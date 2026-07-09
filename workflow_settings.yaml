@@ -1,4 +1,4 @@
 defaultProject: baccarat-471702
-defaultDataset: dataform
+defaultLocation: australia-southeast1
+defaultDataset: analytics_315318549
 defaultAssertionDataset: dataform_assertions
-dataformCoreVersion: 3.0.52
