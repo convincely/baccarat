@@ -1,0 +1,22 @@
+config {
+  type: "operations",               // WHILE loop + CALL stored procedure -> operations
+  schema: "analytics_315318549",
+  name: "Knives_Combined",
+  tags: ["daily"],                  // original schedule: every day 23:30
+  dependencies: ["Dependant_tables"],
+  description: "Loops dates and calls pop_Knives_Combined. Migrated verbatim from 'Knives Combined'. TODO: migrate proc body."
+}
+
+DECLARE ProcessDate DATE DEFAULT DATE_SUB(CURRENT_DATE(), INTERVAL 3 DAY);
+DECLARE EndDate DATE DEFAULT CURRENT_DATE();
+
+
+WHILE ProcessDate <= EndDate DO
+
+call `baccarat-471702.analytics_315318549.pop_Knives_Combined`(ProcessDate,ProcessDate);
+
+SET ProcessDate = DATE_ADD(ProcessDate, INTERVAL 1 DAY);
+
+
+
+END WHILE;

@@ -1,0 +1,27 @@
+config {
+  type: "operations",               // DECLARE + DELETE + INSERT -> operations (verbatim)
+  schema: "analytics_315318549",
+  name: "Variant",
+  tags: ["daily"],                  // original schedule: every day 23:15
+  hasOutput: true,
+  dependencies: ["Unnesting"],      // reads unnested_data
+  description: "Latest variant per user into variant table. Migrated verbatim from 'Variant'."
+}
+
+DECLARE StartDate date DEFAULT CURRENT_DATE()-3 ;
+DECLARE EndDate date DEFAULT CURRENT_DATE() ;
+DECLARE StartDateText string DEFAULT FORMAT_DATE('%Y%m%d', StartDate) ;
+DECLARE EndDateText string DEFAULT FORMAT_DATE('%Y%m%d', EndDate) ;
+
+delete from `analytics_315318549.variant`
+where event_date between StartDate and EndDate;
+
+insert into `analytics_315318549.variant` (user_pseudo_id,variant,event_date)
+
+SELECT user_pseudo_id,max(variant) variant, event_date FROM `analytics_315318549.unnested_data`
+where event_date
+BETWEEN
+DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY) AND
+CURRENT_DATE()
+and variant is not null
+group by user_pseudo_id,event_date

@@ -1,0 +1,17 @@
+config {
+  type: "operations",               // create or replace table -> operations (verbatim)
+  schema: "analytics_315318549",
+  name: "UsersToExclude",
+  tags: ["daily"],                  // original schedule: every day 22:00
+  hasOutput: true,
+  description: "Rebuilds Users_to_exclude (India/Brazil/dev/cvly traffic). Migrated verbatim from 'UsersToExclude'."
+}
+
+create or replace table `analytics_315318549.Users_to_exclude`
+partition by event_date as
+select distinct user_pseudo_id , DATE(TIMESTAMP_MICROS(event_timestamp),'Australia/Sydney') as event_date from `analytics_315318549.events_intraday_*`, unnest(event_params) p
+where  _TABLE_SUFFIX BETWEEN
+  FORMAT_DATE("%Y%m%d", DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)) AND
+  FORMAT_DATE("%Y%m%d", CURRENT_DATE()) and (geo.country in('India','Brazil') or
+  (case when p.key='page_location' then p.value.string_value end) like '%cvly=%' or
+  (case when p.key='page_location' then p.value.string_value end) like '%develop%')

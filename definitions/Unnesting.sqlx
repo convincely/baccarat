@@ -1,0 +1,40 @@
+config {
+  type: "operations",               // DECLARE + DELETE + INSERT -> operations (verbatim)
+  schema: "analytics_315318549",
+  name: "Unnesting",
+  tags: ["daily"],                  // original schedule: every day 22:01
+  hasOutput: true,
+  description: "Daily unnest into unnested_data. Migrated verbatim from 'Unnesting'."
+}
+
+DECLARE StartDate DATE DEFAULT current_date('Australia/Sydney')-2;
+DECLARE EndDate DATE DEFAULT current_date('Australia/Sydney');
+
+DECLARE EndDateText string default  format_date('%Y%m%d', EndDate) ;
+DECLARE StartDateText string default  format_date('%Y%m%d', StartDate) ;
+
+delete from `analytics_315318549.unnested_data`
+where event_date between StartDate and EndDate;
+
+insert into `analytics_315318549.unnested_data`(user_pseudo_id,event_name,event_date,event_ts,event_label,event_category,funnel,event_Source,event_Medium,cvly_entrypoint,cvly_product,cvly_section,variant,page_location,page_referrer,landing_page)
+
+SELECT distinct
+user_pseudo_id,
+event_name,
+DATE(TIMESTAMP_MICROS(event_timestamp),'Australia/Sydney') as event_date,
+DATETIME(TIMESTAMP_MICROS(event_timestamp), 'Australia/Sydney') as event_ts,
+
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='event_label')event_label,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='event_category')event_category,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='funnel')funnel,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='source')event_Source,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='medium')event_Medium,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='cvly_entrypoint')cvly_entrypoint,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='cvly_product') cvly_product,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='cvly_section')cvly_section,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='variant')variant,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='page_location') page_location,
+(select ep.value.string_value  from unnest(event_params)ep where ep.key='page_referrer')page_referrer,
+case when (select value.int_value from unnest(event_params) where event_name = 'page_view' and key = 'entrances') = 1
+then (select value.string_value from unnest(event_params) where event_name = 'page_view' and key = 'page_location') end as landing_page
+ FROM `analytics_315318549.events_*`

@@ -1,0 +1,38 @@
+config {
+  type: "operations",               // WHILE loop + CALL stored procedures -> operations
+  schema: "analytics_315318549",
+  name: "Dependant_tables",
+  tags: ["daily"],                  // original schedule: every day 23:20
+  dependencies: ["Unnesting", "Variant", "UserMetaDataPartitioned"],
+  description: "Loops dates and calls ~10 stored procedures (session agg, add-to-cart, purchase, recommendation, variant, target segment). Migrated verbatim from 'Dependant_tables'. TODO: migrate proc bodies. NOTE: pop_all_purchase_items is called twice in the original (kept as-is)."
+}
+
+DECLARE ProcessDate DATE DEFAULT DATE_SUB(CURRENT_DATE(), INTERVAL 3 DAY);
+DECLARE EndDate DATE DEFAULT CURRENT_DATE();
+
+
+WHILE ProcessDate <= EndDate DO
+
+   CALL `analytics_315318549.Session_level_agg_data`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_All_AddToCarts`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_All_BeginCheckout`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_All_EntryPoint`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_all_purchase_items`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_all_purchase_items`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_any_product`(ProcessDate,ProcessDate);
+
+  CALL `analytics_315318549.pop_any_recommendation`(ProcessDate,ProcessDate);
+
+  call `baccarat-471702.analytics_315318549.pop_variant`(ProcessDate,ProcessDate);
+
+  call `baccarat-471702.analytics_315318549.Knives_target_segment`(ProcessDate,ProcessDate);
+
+    SET ProcessDate = DATE_ADD(ProcessDate, INTERVAL 1 DAY);
+
+END WHILE;

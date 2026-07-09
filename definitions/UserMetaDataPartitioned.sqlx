@@ -1,0 +1,45 @@
+config {
+  type: "operations",               // DECLARE + DELETE + INSERT -> operations (verbatim)
+  schema: "analytics_315318549",
+  name: "UserMetaDataPartitioned",
+  tags: ["daily"],                  // original schedule: every day 23:15
+  hasOutput: true,
+  description: "User metadata into UserMetaDataPartitioned from raw GA4 events. Migrated verbatim from 'UserMetaDataPartitioned'."
+}
+
+DECLARE StartDate date DEFAULT CURRENT_DATE()-3 ;
+DECLARE EndDate date DEFAULT CURRENT_DATE() ;
+DECLARE StartDateText string DEFAULT FORMAT_DATE('%Y%m%d', StartDate) ;
+DECLARE EndDateText string DEFAULT FORMAT_DATE('%Y%m%d', EndDate) ;
+
+delete from `analytics_315318549.UserMetaDataPartitioned`
+where event_date between StartDate and EndDate;
+
+insert into `analytics_315318549.UserMetaDataPartitioned`
+
+SELECT u.user_pseudo_id,
+DATE(TIMESTAMP_MICROS(event_timestamp),'Australia/Sydney') event_date,
+u.traffic_source.name Campaign,
+u.traffic_source.source Source,
+u.traffic_source.medium Medium,
+u.device.category deviceCategory,
+u.device.web_info.browser browser,
+u.device.web_info.hostname hostname,
+u.geo.country as country,
+u.geo.region as region,
+u.geo.city as city,
+u.stream_id,
+u.ecommerce.purchase_revenue
+FROM `analytics_315318549.events_*` u
+where
+ _TABLE_SUFFIX between StartDateText AND EndDateText
+group by user_pseudo_id,event_date,
+Campaign, Source,  Medium,
+deviceCategory,
+browser,
+hostname,
+country,
+region,
+city,
+u.stream_id,
+u.ecommerce.purchase_revenue
