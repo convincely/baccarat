@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "analytics bq repository",
   "private": true,
-  "dependencies": {
-    "@dataform/core": "^2.13.0"
-  },
   "dataform": {
     "projectId": "baccarat-471702",
     "defaultLocation": "australia-southeast1"
