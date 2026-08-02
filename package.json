@@ -1,0 +1,8 @@
+{
+  "name": "baccarat",
+  "description": "analytics bq repository",
+  "dataform": {
+    "projectId": "baccarat-471702",
+    "defaultLocation": "australia-southeast1"
+  }
+}
