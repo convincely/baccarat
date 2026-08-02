@@ -4,7 +4,7 @@
   "description": "analytics bq repository",
   "private": true,
   "dependencies": {
-    "@dataform/core": "3.x"
+    "@dataform/core": "3.0.63"
   },
   "dataform": {
     "projectId": "baccarat-471702",
