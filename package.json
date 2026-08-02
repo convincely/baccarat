@@ -1,6 +1,8 @@
 {
   "name": "baccarat",
+  "version": "1.0.0",
   "description": "analytics bq repository",
+  "private": true,
   "dataform": {
     "projectId": "baccarat-471702",
     "defaultLocation": "australia-southeast1"
