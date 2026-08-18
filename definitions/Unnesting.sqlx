@@ -38,3 +38,5 @@ DATETIME(TIMESTAMP_MICROS(event_timestamp), 'Australia/Sydney') as event_ts,
 case when (select value.int_value from unnest(event_params) where event_name = 'page_view' and key = 'entrances') = 1
 then (select value.string_value from unnest(event_params) where event_name = 'page_view' and key = 'page_location') end as landing_page
  FROM `analytics_315318549.events_*`
+
+# Testing edits from Ram's Claude Prompt
